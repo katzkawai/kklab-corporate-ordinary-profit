@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="日本企業の売上高経常利益率を、業種・資本金規模別に比較。財務省「法人企業統計調査」の{{ start }}〜{{ end }}年度の年次データを可視化。PythonコードとCSVも公開。">
+  <meta name="theme-color" content="#123840">
+  <title>日本企業の収益力を読む | KKLab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23123840'/%3E%3Cpath d='M6 23l7-7 5 3 8-11' stroke='%2385d7c7' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="./" aria-label="KKLab ホーム"><span class="brand-mark" aria-hidden="true">K</span> KKLab <span class="brand-sub">DATA NOTES</span></a>
+    <nav aria-label="メインナビゲーション"><a href="#trends">グラフ</a><a href="#insights">読み解く</a><a href="#sources">データ・出典</a><a class="github-link" href="https://github.com/katzkawai/kklab-corporate-ordinary-profit">GitHub ↗</a></nav>
+  </div>
+</header>
+<main id="main">
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow"><span class="status-dot"></span> JAPAN CORPORATE FINANCE <span class="hero-number">DATA NOTE 01</span></div>
+      <div class="hero-heading"><div><h1>日本企業の<br>収益力を読む<span class="title-dot">。</span></h1><p class="hero-subtitle">売上高経常利益率でたどる、業種と企業規模の10年。</p></div>
+        <div class="period"><span>観測期間 / 年次</span><strong>{{ start }}<span>—</span>{{ end }}</strong><small>財務省「法人企業統計調査」</small></div>
+      </div>
+      <div class="hero-footer"><p>売上100円に対して、経常利益はいくら残るのか。<br class="mobile-only">公的統計から、日本企業の収益構造を比較します。</p><a href="#trends">推移を見る <span aria-hidden="true">↓</span></a></div>
+    </div>
+  </section>
+  <div class="content">
+    <div class="scope"><span><span class="scope-dot"></span> {{ end }}年度までの公表値</span><span>金融業・保険業を除く</span><span>公表：{{ info.published_at }} / 取得：{{ info.retrieved_at[:10] }}</span></div>
+    <section class="metrics" aria-label="最新年度の主要指標">
+      <article class="metric"><p class="metric-label">全産業 <span>全規模 / {{ end }}年度</span></p><p class="metric-value">{{ '%.2f'|format(latest.ordinary_margin_pct) }}<span>%</span></p><p class="metric-note"><span class="teal">{{ '%+.2f'|format(latest.ordinary_margin_pct - first.ordinary_margin_pct) }} pt</span> <span>{{ start }}年度比</span></p></article>
+      <article class="metric"><p class="metric-label">製造業 <span>全規模 / {{ end }}年度</span></p><p class="metric-value">{{ '%.2f'|format(manufacturing.ordinary_margin_pct) }}<span>%</span></p><p class="metric-note"><span class="dot teal-bg"></span>非製造業 <strong>{{ '%.2f'|format(nonmanufacturing.ordinary_margin_pct) }}%</strong></p></article>
+      <article class="metric"><p class="metric-label">資本金規模間の差 <span>全産業 / {{ end }}年度</span></p><p class="metric-value">{{ '%.2f'|format(gap) }}<span>pt</span></p><p class="metric-note">10億円以上 − 1億円未満</p></article>
+    </section>
+
+    <section id="trends" class="section">
+      <div class="section-heading"><div><p class="eyebrow dark">01 / EXPLORE THE TRENDS</p><h2>2つの視点で、推移を比較</h2></div><a class="text-link" href="assets/ordinary-profit-margin.png" download>全体グラフを保存 <span aria-hidden="true">↓</span></a></div>
+      <p class="section-intro">各図は共通の縦軸で表示。色とマーカー・線種で系列を区別しています。</p>
+      <article class="chart-card" data-chart="industry">
+        <div class="chart-header"><div><span class="chart-index">A</span><div><h3>業種別の比較</h3><p>全産業・製造業・非製造業</p></div></div><label class="chart-select">資本金規模<select id="industry-select" aria-controls="industry-chart industry-table">{% for key, label in sizes.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select></label></div>
+        <figure><div class="chart-scroll"><picture><source id="industry-mobile-source" media="(max-width: 560px)" srcset="assets/industry-all-mobile.svg"><img id="industry-chart" src="assets/industry-all.svg" alt="{{ start }}〜{{ end }}年度の売上高経常利益率。全規模の全産業・製造業・非製造業を比較。数値は直後のデータ表で確認できます。" width="1200" height="540"></picture></div><figcaption>経常利益 ÷ 売上高 × 100。全産業・非製造業は金融業・保険業を除く。<span>単位：%</span></figcaption></figure>
+        <div class="chart-actions"><details><summary>数値を表で確認</summary><div class="table-scroll" id="industry-table"></div></details><a id="industry-download" href="assets/industry-all.png" download>PNG ↓</a></div>
+      </article>
+      <article class="chart-card" data-chart="size">
+        <div class="chart-header"><div><span class="chart-index">B</span><div><h3>資本金規模別の比較</h3><p>10億円以上・1億円以上10億円未満・1億円未満</p></div></div><label class="chart-select">業種<select id="size-select" aria-controls="size-chart size-table">{% for key, label in sectors.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select></label></div>
+        <figure><div class="chart-scroll"><picture><source id="size-mobile-source" media="(max-width: 560px)" srcset="assets/size-104-mobile.svg"><img id="size-chart" src="assets/size-104.svg" alt="{{ start }}〜{{ end }}年度の売上高経常利益率。全産業について3つの資本金規模を比較。数値は直後のデータ表で確認できます。" width="1200" height="540" loading="lazy"></picture></div><figcaption>1億円未満は、下位2区分の経常利益・売上高を合算して計算。<span>単位：%</span></figcaption></figure>
+        <div class="chart-actions"><details><summary>数値を表で確認</summary><div class="table-scroll" id="size-table"></div></details><a id="size-download" href="assets/size-104.png" download>PNG ↓</a></div>
+      </article>
+      <p class="chart-caveat"><strong>時系列の注意</strong> グレーの帯は2025年度。資本金5億円以上の未回答法人について、この年度から欠測値の補完方法が変更されています。 <a href="https://www.mof.go.jp/pri/reference/ssc/summary/kessokuchi_20260630.pdf">変更の詳細 ↗</a></p>
+      <p id="chart-status" class="sr-only" role="status" aria-live="polite"></p>
+      <noscript><p class="notice">グラフの切り替えとデータ表にはJavaScriptが必要です。上のグラフと<a href="data/ordinary_profit_margin.csv">全データCSV</a>はそのまま閲覧できます。</p></noscript>
+    </section>
+
+    <section id="insights" class="section insights-section">
+      <div class="section-heading"><div><p class="eyebrow dark">02 / READING THE DATA</p><h2>グラフから読み取れること</h2></div><span class="section-aside">{{ start }}–{{ end }}年度の全期間に基づく解説</span></div>
+      <div class="insight-grid">{% for insight in insights %}<article class="insight"><div class="insight-top"><span class="insight-number">0{{ loop.index }}</span><span class="insight-tag">{{ insight.tag }}</span></div><h3>{{ insight.title }}</h3><p>{{ insight.body }}</p></article>{% endfor %}</div>
+      <p class="small-note">これらは集計値の比較から得られる記述的な特徴です。為替・価格転嫁・生産性など、差を生む個別要因の寄与はこのグラフだけでは特定できません。</p>
+    </section>
+
+    <section id="sources" class="section">
+      <div class="section-heading"><div><p class="eyebrow dark">03 / SOURCES & METHOD</p><h2>データと計算方法</h2></div></div>
+      <div class="method-grid"><div class="formula-panel"><span>売上高経常利益率</span><p><strong>経常利益</strong><span class="formula-divide">÷</span><strong>売上高</strong><span class="formula-times">× 100</span></p><small>法人企業統計の母集団推計値を使用。企業ごとの利益率の単純平均ではなく、集計金額の比率です。</small></div><dl class="definition-list"><div><dt>調査</dt><dd><a href="{{ source_url }}">財務省「法人企業統計調査」年次別調査 ↗</a><br>e-Stat 統計表ID：{{ info.stats_data_id }}</dd></div><div><dt>対象・期間</dt><dd>金融業・保険業を除く営利法人等。{{ start }}〜{{ end }}年度の確定決算に基づく年次データ。暦年・四半期の値とは区別しています。</dd></div><div><dt>資本金規模</dt><dd>「10億円以上」「1億円以上10億円未満」「1億円未満」の3区分。最後の区分には1,000万円未満も含みます。中小企業基本法や従業員数による企業区分ではありません。</dd></div><div><dt>指標の範囲</dt><dd>経常利益は営業利益に営業外収益・費用を加減したもの。受取配当金なども含むため、国内の本業だけの利益率とは異なります。単体法人の集計で、連結決算の利益率ではありません。</dd></div></dl></div>
+      <details class="method-details"><summary>集計の注意点・検証内容を見る</summary><div><ul><li>年次別調査を使用し、対象範囲が異なる四半期別調査を接続していません。未公表の{{ end + 1 }}年度の値は補間・予測していません。</li><li>資本金1億円未満は「1,000万円以上1億円未満」と「1,000万円未満」の金額を合算。公表利益率を平均していません。</li><li>同じ企業を追跡するパネルではありません。資本金の変更、業種構成、母集団・標本の変化などが集計値に影響します。差の統計的有意性は検定していません。</li><li>2025年度から、金融・保険業を除く資本金5億円以上の未回答法人で前年度回答がある場合、その過去データによる補完に変更されています。</li><li>公表利益率150点と再計算値を照合（原表の小数1桁丸めの範囲内）。製造業＋非製造業、資本金の相互排他的な4区分の金額が全体と一致することを確認（百万円単位の丸めを許容）。</li><li>グラフ・カードは原金額から再計算した小数2桁表示。原表の小数1桁表示と桁数が異なります。比率の差は丸め前の値から計算します。</li><li>出典：<a href="https://www.mof.go.jp/pri/reference/ssc/index.htm">調査概要</a> / <a href="https://www.mof.go.jp/pri/reference/ssc/results/data.htm">調査結果・用語・算式</a> / <a href="https://www.mof.go.jp/pri/reference/ssc/summary/kessokuchi_20260630.pdf">補完方法の変更</a>。このページは公表資料を加工したもので、財務省の公式ページではありません。</li></ul></div></details>
+      <div class="download-panel"><div><p class="eyebrow dark">OPEN DATA / REPRODUCIBLE</p><h3>データから、もう一度たどれる。</h3><p>計算に使った原データと、図を生成するコードを公開しています。</p><code>uv run build.py</code></div><div class="download-links"><a class="button primary" href="data/ordinary_profit_margin.csv" download>集計済みCSV <span>↓</span></a><a class="button" href="https://github.com/katzkawai/kklab-corporate-ordinary-profit/blob/main/build.py">Pythonコード <span>↗</span></a><a href="data/estat_annual.csv" download>e-Stat原データ（CP932） ↓</a><a href="data/provenance.json">取得情報・検証結果 ↗</a></div></div>
+      <p class="small-note">コードはPEP 723形式。リポジトリ一式を取得し、<code>uv run build.py</code> で保存済みデータから再生成できます。<code>--refresh</code> を加えるとe-Statの公開CSVを再取得します（APIキー不要）。</p>
+    </section>
+  </div>
+</main>
+<footer><div><a class="brand" href="./">KKLab <span class="brand-sub">DATA NOTES</span></a><p>公的統計を、考えるための手がかりに。</p><a href="https://github.com/katzkawai/kklab-corporate-ordinary-profit">Source on GitHub ↗</a></div></footer>
+<script id="chart-data" type="application/json">{{ rows|tojson }}</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "source_url": "https://www.e-stat.go.jp/dbview?sid=0003060791",
+  "stats_data_id": "0003060791",
+  "source_title": "法人企業統計調査・年次別調査／金融業、保険業以外の業種（原数値）",
+  "published_at": "2026-09-01",
+  "source_updated_at": "2026-09-01",
+  "retrieved_at": "2026-09-22T05:45:04.814+09:00",
+  "fiscal_year_start": 2016,
+  "fiscal_year_end": 2025,
+  "raw_sha256": "0d78f9560014d4d678414d9c4c2df455f2263db8045bd1a8c81ae6fc69c6d3df",
+  "raw_rows": 600,
+  "published_ratio_max_difference_pp": 0.04973809732404488,
+  "aggregate_max_residual_million_yen": 0.0
+}
