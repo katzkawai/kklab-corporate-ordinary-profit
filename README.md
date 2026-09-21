@@ -2,7 +2,9 @@
 
 財務省「法人企業統計調査」の年次別調査を用い、2016〜2025年度の10年間の利益率を可視化します。
 
-**公開ページ：<https://katzkawai.github.io/kklab-corporate-ordinary-profit/>**
+**公開ページ：<https://katzkawai.org/kklab-corporate-ordinary-profit/>**
+
+GitHub Pagesで配信しています。`katzkawai.github.io` のプロジェクトURLからも、アカウントに設定済みの独自ドメインへ転送されます。
 
 ![売上高経常利益率の推移](docs/assets/ordinary-profit-margin.png)
 
